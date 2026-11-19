@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sort, Count &amp; Graph! — Learn + 5 Sets</title>
+<style>
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    padding: 18px 14px 44px;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', system-ui, sans-serif;
+    background: linear-gradient(165deg, #e9f6ff 0%, #fff8e8 100%);
+    color: #2f3e4d;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* =========================================================
+     INTRO / LESSON
+  ========================================================= */
+  .intro-screen { max-width: 900px; margin: 0 auto; padding: 10px 4px 30px; text-align: center; }
+  .intro-screen h1 {
+    font-size: clamp(24px, 5vw, 38px);
+    color: #1f6fb2;
+    margin: 6px 0 8px;
+  }
+  .intro-sub { font-size: clamp(15px, 2.8vw, 19px); color: #5b6b7c; margin: 0 0 22px; }
+
+  .lesson-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 22px 20px 24px;
+    box-shadow: 0 6px 0 #dbe7f2, 0 10px 24px rgba(31, 111, 178, .10);
+    margin-bottom: 18px;
+    position: relative;
+    text-align: left;
+  }
+  .lesson-badge {
+    position: absolute;
+    top: -16px;
+    left: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffd447;
+    color: #7a4f00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    box-shadow: 0 4px 0 #e0b32f;
+  }
+  .lesson-card h2 {
+    font-size: clamp(19px, 3.4vw, 23px);
+    color: #1f6fb2;
+    margin: 6px 0 10px;
+  }
+  .lesson-card p {
+    font-size: clamp(14px, 2.5vw, 16px);
+    color: #3d4f61;
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+
+  /* Data examples */
+  .data-examples {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 12px 0;
+  }
+  @media (max-width: 480px) { .data-examples { grid-template-columns: 1fr; } }
+  .data-example {
+    background: #fff9e8;
+    border: 3px dashed #ffd447;
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .data-example .emojis { font-size: 30px; line-height: 1; letter-spacing: 2px; }
+  .data-example .label { font-weight: bold; color: #7a4f00; font-size: 16px; }
+
+  /* Labeled chart demo */
+  .demo-chart {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 6px;
+    padding: 10px 4px 4px;
+    max-width: 380px;
+    margin: 14px auto 4px;
+  }
+  .demo-y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #8aa0b4;
+    text-align: right;
+    padding-right: 4px;
+    height: 130px;
+  }
+  .demo-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    border-left: 3px solid #cbd5e1;
+    border-bottom: 3px solid #cbd5e1;
+    height: 130px;
+    padding: 0 6px;
+  }
+  .demo-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .demo-num { font-weight: bold; color: #5b6b7c; font-size: 15px; height: 18px; line-height: 18px; }
+  .demo-bar { width: 32px; border-radius: 8px 8px 0 0; }
+  .demo-x-labels {
+    display: flex;
+    justify-content: space-around;
+    padding-left: 34px;
+    font-size: 22px;
+    margin-top: 4px;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .chart-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 14px;
+    font-size: 14px;
+  }
+  .chart-key span {
+    background: #eaf4ff;
+    color: #1f6fb2;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: bold;
+  }
+
+  /* Try-it demo */
+  .try-buttons { display: flex; justify-content: center; gap: 14px; margin: 10px 0 16px; flex-wrap: wrap; }
+  .fruit-btn {
+    font-family: inherit; font-size: 32px; line-height: 1;
+    width: 62px; height: 62px; padding: 0;
+    border: 3px solid #e3ecf5; border-radius: 18px;
+    background: #f8fbff; cursor: pointer;
+    box-shadow: 0 4px 0 #dbe7f2;
+    transition: transform .15s, box-shadow .15s, background .15s;
+  }
+  .fruit-btn:hover { background: #eaf4ff; transform: translateY(-2px); }
+  .fruit-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #dbe7f2; }
+  .try-chart-wrap { display: flex; flex-direction: column; align-items: center; }
+  .try-chart {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 26px; height: 150px; padding: 0 10px 4px;
+    border-bottom: 3px solid #cbd5e1; border-left: 3px solid #cbd5e1;
+    margin: 0 22px; width: 260px;
+  }
+  .try-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .try-num { font-size: 17px; font-weight: bold; color: #5b6b7c; height: 22px; line-height: 22px; }
+  .try-bar { width: 34px; border-radius: 8px 8px 0 0; transition: height .4s cubic-bezier(.34, 1.56, .64, 1); }
+  .try-labels {
+    display: flex; justify-content: center; gap: 42px;
+    font-size: 24px; margin-top: 6px; padding-right: 26px;
+  }
+  .btn-reset {
+    font-family: inherit; font-size: 16px; font-weight: bold;
+    padding: 8px 20px; margin-top: 14px;
+    border: none; border-radius: 14px;
+    background: #fff; color: #1f6fb2;
+    box-shadow: 0 4px 0 #cfe0ee; cursor: pointer;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn-reset:active { transform: translateY(3px); box-shadow: 0 1px 0 #cfe0ee; }
+
+  /* Practice round */
+  .practice-board {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 12px;
+    margin: 12px 0;
+  }
+  @media (max-width: 600px) { .practice-board { grid-template-columns: 1fr; } }
+  .practice-side { background: #f8fbff; border-radius: 16px; padding: 10px; }
+  .practice-side h4 {
+    margin: 0 0 8px; font-size: 12px;
+    color: #7b8ea1; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .practice-pile { display: flex; flex-wrap: wrap; gap: 6px; min-height: 90px; }
+  .practice-pile .item {
+    width: 44px; height: 44px; font-size: 24px;
+    border-radius: 12px; border-width: 2px;
+  }
+  .practice-bins { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .practice-bins .bin {
+    min-height: 100px; padding: 6px;
+  }
+  .practice-bins .bin-head { font-size: 12px; }
+  .practice-bins .bin-emoji { font-size: 16px; }
+  .practice-bins .bin-items { gap: 4px; }
+  .practice-bins .item.small {
+    width: 34px; height: 34px; font-size: 19px; border-radius: 10px;
+  }
+  .p-empty {
+    width: 100%; text-align: center; color: #9ab0c4; font-size: 14px; padding: 30px 0;
+  }
+  #practiceCount p {
+    text-align: center; font-weight: bold;
+    color: #1f6fb2; margin: 14px 0 10px;
+  }
+  .practice-count-row {
+    display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .practice-count-cell {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 16px; font-weight: bold; color: #3d4f61;
+  }
+  .practice-count-cell .num-input { width: 64px; height: 48px; font-size: 22px; }
+  .practice-btns {
+    display: flex; gap: 10px; justify-content: center;
+    flex-wrap: wrap; margin-top: 14px;
+  }
+  .practice-msg {
+    text-align: center; font-weight: bold; min-height: 22px;
+    color: #ef5350; margin: 10px 0;
+  }
+  #practiceResult { text-align: center; margin-top: 14px; }
+  #practiceResult .success {
+    font-size: 18px; font-weight: bold; color: #2e7d32; margin: 0 0 14px;
+  }
+  .practice-chart {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 26px; height: 130px; padding: 0 20px 4px;
+    border-bottom: 3px solid #cbd5e1; border-left: 3px solid #cbd5e1;
+    max-width: 260px; margin: 0 auto;
+  }
+  .practice-chart-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .practice-chart-num { font-weight: bold; color: #5b6b7c; font-size: 15px; }
+  .practice-chart-bar { width: 34px; border-radius: 8px 8px 0 0; transition: height .5s; }
+  .practice-chart-label { font-size: 22px; margin-top: 4px; }
+  .ready-msg {
+    margin-top: 14px; font-size: 18px; font-weight: bold; color: #1f6fb2;
+  }
+
+  /* Start button */
+  .btn-start {
+    margin: 26px auto 0;
+    display: block;
+    font-family: inherit;
+    font-size: clamp(20px, 3.4vw, 24px);
+    font-weight: bold;
+    padding: 16px 38px;
+    border: none; border-radius: 20px;
+    background: #ffd447; color: #7a4f00;
+    cursor: pointer;
+    box-shadow: 0 7px 0 #e0b32f;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn-start:active { transform: translateY(5px); box-shadow: 0 2px 0 #e0b32f; }
+  .btn-start:hover { background: #ffde6b; }
+
+  /* =========================================================
+     GAME
+  ========================================================= */
+  .app { max-width: 900px; margin: 0 auto; }
+  h1.game-title {
+    font-size: clamp(22px, 4.5vw, 34px);
+    text-align: center; margin: 0 0 10px; color: #1f6fb2;
+  }
+  .setbar { display: flex; justify-content: center; gap: 8px; margin: 0 0 6px; flex-wrap: wrap; }
+  .setpill {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 17px;
+    background: #fff; color: #9ab0c4;
+    border: 3px solid #dbe7f2; box-shadow: 0 3px 0 #dbe7f2;
+    transition: transform .2s, background .2s, color .2s, border-color .2s, box-shadow .2s;
+  }
+  .setpill.active {
+    background: #ffd447; color: #7a4f00;
+    border-color: #e0b32f; box-shadow: 0 3px 0 #e0b32f;
+    transform: scale(1.12);
+  }
+  .setpill.done {
+    background: #e6f7ea; color: #2e7d32;
+    border-color: #a5d6a7; box-shadow: 0 3px 0 #a5d6a7;
+  }
+  .setinfo { text-align: center; font-size: 14px; color: #8aa0b4; margin: 0 0 12px; letter-spacing: .3px; }
+  .hint {
+    text-align: center; font-size: clamp(14px, 2.6vw, 18px);
+    color: #5b6b7c; margin: 0 0 18px; min-height: 26px;
+  }
+  .board { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
+  @media (max-width: 680px) { .board { grid-template-columns: 1fr; } }
+  .card {
+    background: #fff; border-radius: 22px; padding: 14px;
+    box-shadow: 0 6px 0 #dbe7f2, 0 10px 24px rgba(31, 111, 178, .10);
+  }
+  .card h2 {
+    margin: 0 0 10px; font-size: 14px; color: #7b8ea1;
+    text-transform: uppercase; letter-spacing: 1.2px;
+  }
+  .pile {
+    display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start;
+    min-height: 180px; max-height: 360px; overflow-y: auto; padding-right: 4px;
+  }
+  .item {
+    font-size: 32px; line-height: 1;
+    width: 56px; height: 56px; padding: 0; flex: 0 0 auto;
+    border: 3px solid #e3ecf5; border-radius: 16px;
+    background: #f8fbff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, box-shadow .15s, border-color .15s, background .15s;
+    user-select: none;
+  }
+  .item:hover { transform: translateY(-3px); }
+  .item:active { transform: scale(.94); }
+  .item.selected {
+    border-color: #1f6fb2; background: #e3f2ff;
+    box-shadow: 0 0 0 4px rgba(31, 111, 178, .18);
+    transform: translateY(-3px) scale(1.06);
+  }
+  .item.dense { width: 42px; height: 42px; font-size: 24px; border-radius: 12px; border-width: 2px; }
+  .item.dense.selected { box-shadow: 0 0 0 3px rgba(31, 111, 178, .20); }
+  .item.small { width: 42px; height: 42px; font-size: 24px; border-radius: 12px; border-width: 2px; }
+  .item.small.dense { width: 34px; height: 34px; font-size: 19px; border-radius: 10px; }
+  .empty {
+    width: 100%; text-align: center; font-size: 18px;
+    color: #9ab0c4; padding: 40px 0;
+  }
+  .bins { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .bin {
+    border: 3px dashed #cbd5e1; border-radius: 18px; padding: 8px;
+    min-height: 112px; cursor: pointer;
+    transition: background .15s, transform .15s;
+  }
+  .bin:hover { background: #f6fbff; transform: translateY(-2px); }
+  .bin:active { transform: scale(.98); }
+  .bin-head {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #5b6b7c;
+  }
+  .bin-emoji { font-size: 20px; }
+  .bin-items { display: flex; flex-wrap: wrap; gap: 6px; max-height: 210px; overflow-y: auto; }
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 22px 0; }
+  .btn {
+    font-family: inherit; font-size: 18px; font-weight: bold;
+    padding: 12px 22px; border-radius: 16px; border: none; cursor: pointer;
+    background: #fff; color: #1f6fb2; box-shadow: 0 5px 0 #cfe0ee;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #cfe0ee; }
+  .btn.primary { background: #ffd447; color: #7a4f00; box-shadow: 0 5px 0 #e0b32f; }
+  .btn.primary:active { box-shadow: 0 1px 0 #e0b32f; }
+  .btn.green { background: #7ed957; color: #1f4d0f; box-shadow: 0 5px 0 #5cb63a; }
+  .btn.green:active { box-shadow: 0 1px 0 #5cb63a; }
+
+  .count-card { margin-top: 16px; }
+  .count-row {
+    display: grid; grid-template-columns: 1fr 1.4fr auto;
+    gap: 12px; align-items: center; padding: 10px 8px;
+    border-bottom: 2px dashed #eef4fa; border-radius: 12px;
+    transition: background .2s;
+  }
+  .count-row:last-child { border-bottom: none; }
+  @media (max-width: 680px) { .count-row { grid-template-columns: 1fr; justify-items: start; } }
+  .count-label { font-weight: bold; font-size: 16px; color: #3d4f61; display: flex; align-items: center; gap: 6px; }
+  .count-fruits {
+    display: flex; flex-wrap: wrap; gap: 3px;
+    font-size: 24px; line-height: 1; min-height: 30px; max-width: 100%;
+  }
+  .num-input {
+    font-family: inherit; font-size: 26px; font-weight: bold;
+    width: 88px; height: 56px; text-align: center;
+    border: 3px solid #cbd5e1; border-radius: 16px;
+    background: #f8fbff; color: #1f6fb2; outline: none;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+  }
+  .num-input::placeholder { color: #b9c9d8; }
+  .num-input:focus { border-color: #1f6fb2; background: #fff; box-shadow: 0 0 0 4px rgba(31, 111, 178, .15); }
+  .num-input.correct { border-color: #4caf50; background: #f1fbf2; color: #2e7d32; }
+  .num-input.wrong { border-color: #ef5350; background: #fff5f5; animation: wobble .5s ease-in-out; }
+  .num-input:disabled { opacity: 1; }
+  .count-row.wrong { background: #fff0f0; }
+  @keyframes wobble {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .graph-card { margin-top: 16px; }
+  .plot {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    align-items: end; height: 250px; padding: 0 6px;
+    border-left: 3px solid #cbd5e1; border-bottom: 3px solid #cbd5e1;
+    background: #fbfdff;
+  }
+  .col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .count { font-size: 20px; font-weight: bold; color: #5b6b7c; height: 26px; line-height: 26px; }
+  .bar { width: clamp(40px, 9vw, 64px); border-radius: 12px 12px 0 0; transition: height .8s cubic-bezier(.34, 1.56, .64, 1); }
+  .labels { display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 6px 0 9px; }
+  .labels div { text-align: center; font-size: 28px; line-height: 1; }
+  .graph-note { text-align: center; margin-top: 14px; font-size: 16px; color: #1f6fb2; font-weight: bold; }
+
+  .finale { margin-top: 16px; text-align: center; padding: 30px 18px 34px; }
+  .finale-emoji { font-size: 56px; line-height: 1.2; }
+  .finale p { font-size: 19px; color: #3d4f61; margin: 10px 0 22px; }
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     INTRO / LESSON SCREEN
+========================================================== -->
+<div class="intro-screen" id="introScreen">
+  <h1>🍎 Welcome to Sort &amp; Graph! 📊</h1>
+  <p class="intro-sub">Let's learn about <strong>data</strong> and <strong>charts</strong> first! 🎈</p>
+
+  <!-- ===== Section 1: What is Data? ===== -->
+  <div class="lesson-card">
+    <div class="lesson-badge">1</div>
+    <h2>What is Data?</h2>
+    <p><strong>Data</strong> is information we collect by <strong>counting</strong> or <strong>looking</strong> at things. When we count fruits, animals, or toys — that's data!</p>
+    <div class="data-examples">
+      <div class="data-example">
+        <span class="emojis">🍎🍎🍎</span>
+        <span class="label">3 apples</span>
+      </div>
+      <div class="data-example">
+        <span class="emojis">🐶🐶🐶🐶</span>
+        <span class="label">4 dogs</span>
+      </div>
+      <div class="data-example">
+        <span class="emojis">⭐</span>
+        <span class="label">1 star</span>
+      </div>
+      <div class="data-example">
+        <span class="emojis">🚗🚗</span>
+        <span class="label">2 cars</span>
+      </div>
+    </div>
+    <p><strong>🎯 Every time you count, you are collecting data!</strong></p>
+  </div>
+
+  <!-- ===== Section 2: What is a Chart? ===== -->
+  <div class="lesson-card">
+    <div class="lesson-badge">2</div>
+    <h2>What is a Bar Chart?</h2>
+    <p>A <strong>chart</strong> is a picture of our data. It helps us see which thing has <strong>more</strong> and which has <strong>fewer</strong> — just by looking!</p>
+    <div class="demo-chart">
+      <div class="demo-y-axis">
+        <div>3</div><div>2</div><div>1</div><div>0</div>
+      </div>
+      <div class="demo-bars">
+        <div class="demo-col">
+          <div class="demo-num">3</div>
+          <div class="demo-bar" style="height: 90px; background: #ef5350;"></div>
+        </div>
+        <div class="demo-col">
+          <div class="demo-num">2</div>
+          <div class="demo-bar" style="height: 60px; background: #fbc02d;"></div>
+        </div>
+        <div class="demo-col">
+          <div class="demo-num">1</div>
+          <div class="demo-bar" style="height: 30px; background: #9c5bd6;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-x-labels">
+      <span>🍎</span><span>🍌</span><span>🍇</span>
+    </div>
+    <div class="chart-key">
+      <span>📏 Bar height = how many</span>
+      <span>🏷️ Label = what it is</span>
+      <span>🔢 Number = the count</span>
+    </div>
+    <p style="text-align:center; margin-top:14px;"><strong>📈 The taller the bar, the more we have!</strong></p>
+  </div>
+
+  <!-- ===== Section 3: Try It! ===== -->
+  <div class="lesson-card">
+    <div class="lesson-badge">3</div>
+    <h2>Try It Yourself! 🎮</h2>
+    <p>Click a fruit to add it. Watch the chart grow — just like a real chart!</p>
+    <div class="try-buttons">
+      <button class="fruit-btn" data-fruit="apple" aria-label="Add an apple">🍎</button>
+      <button class="fruit-btn" data-fruit="banana" aria-label="Add a banana">🍌</button>
+      <button class="fruit-btn" data-fruit="grape" aria-label="Add some grapes">🍇</button>
+    </div>
+    <div class="try-chart-wrap">
+      <div class="try-chart" id="tryChart"></div>
+      <div class="try-labels">
+        <span>🍎</span><span>🍌</span><span>🍇</span>
+      </div>
+      <button class="btn-reset" id="resetTryBtn">🔄 Reset Chart</button>
+    </div>
+  </div>
+
+  <!-- ===== Section 4: Practice Round ===== -->
+  <div class="lesson-card">
+    <div class="lesson-badge">4</div>
+    <h2>Practice Round 🎯</h2>
+    <p>Now let's try a small version! Sort the fruits, count them, and make a chart.</p>
+
+    <div class="practice-board">
+      <div class="practice-side">
+        <h4>Mixed up — tap to pick</h4>
+        <div class="practice-pile" id="practicePile"></div>
+      </div>
+      <div class="practice-side">
+        <h4>Baskets — tap to drop</h4>
+        <div class="practice-bins" id="practiceBins"></div>
+      </div>
+    </div>
+
+    <div id="practiceCount" hidden></div>
+    <p class="practice-msg" id="practiceMsg"></p>
+    <div class="practice-btns">
+      <button class="btn primary" id="practiceCheckBtn" hidden>✅ Check</button>
+      <button class="btn" id="practiceResetBtn">🔄 Reset Practice</button>
+    </div>
+    <div id="practiceResult" hidden></div>
+  </div>
+
+  <button class="btn-start" id="startBtn">Start the Real Game! ▶</button>
+</div>
+
+<!-- =========================================================
+     GAME SCREEN
+========================================================== -->
+<div class="app" id="gameScreen" hidden>
+  <h1 class="game-title">🍎 Sort, Count &amp; Graph! 📊</h1>
+  <div class="setbar" id="setbar"></div>
+  <p class="setinfo" id="setinfo"></p>
+  <p class="hint" id="hint">Tap a fruit, then tap a basket. 🍎➡️🧺</p>
+
+  <div class="board" id="board">
+    <section class="card">
+      <h2>Mixed Up!</h2>
+      <div class="pile" id="pile"></div>
+    </section>
+    <section class="card">
+      <h2>Baskets</h2>
+      <div class="bins" id="bins"></div>
+    </section>
+  </div>
+
+  <div class="actions" id="actions">
+    <button class="btn primary" id="graphBtn">✅ Check &amp; Graph</button>
+    <button class="btn" id="newBtn">🔄 Re-sort</button>
+    <button class="btn green" id="nextBtn" hidden>Next Set ▶</button>
+  </div>
+
+  <section class="card count-card" id="countCard" hidden>
+    <h2>Count the items and write the number! ✏️</h2>
+    <div id="countRows"></div>
+  </section>
+
+  <section class="card graph-card" id="graphCard" hidden>
+    <h2 id="graphTitle">Our Graph</h2>
+    <div class="plot" id="plot"></div>
+    <div class="labels" id="labels"></div>
+    <p class="graph-note" id="graphNote"></p>
+  </section>
+
+  <section class="card finale" id="finaleCard" hidden>
+    <div class="finale-emoji">🎉🏆🎉</div>
+    <p>You sorted, counted and graphed all 5 sets. Amazing work!</p>
+    <button class="btn primary" id="playAgainBtn">🎈 Play Again</button>
+  </section>
+</div>
+
+<script>
+/* =========================================================
+   INTRO — Try-It Chart with Reset
+========================================================== */
+const DEMO_MAX = 10;
+const DEMO_COLORS = { apple: '#ef5350', banana: '#fbc02d', grape: '#9c5bd6' };
+const DEMO_EMOJI  = { apple: '🍎', banana: '🍌', grape: '🍇' };
+let demoCounts = { apple: 0, banana: 0, grape: 0 };
+
+function renderTryChart() {
+  const el = document.getElementById('tryChart');
+  el.innerHTML = '';
+  Object.keys(demoCounts).forEach(fruit => {
+    const count = demoCounts[fruit];
+    const col = document.createElement('div');
+    col.className = 'try-col';
+    const num = document.createElement('div');
+    num.className = 'try-num';
+    num.textContent = count;
+    const bar = document.createElement('div');
+    bar.className = 'try-bar';
+    bar.style.background = DEMO_COLORS[fruit];
+    bar.style.height = (count * (130 / DEMO_MAX)) + 'px';
+    col.appendChild(num);
+    col.appendChild(bar);
+    el.appendChild(col);
+  });
+}
+renderTryChart();
+
+document.querySelectorAll('.fruit-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.fruit;
+    if (demoCounts[f] < DEMO_MAX) { demoCounts[f]++; renderTryChart(); }
+  });
+});
+document.getElementById('resetTryBtn').addEventListener('click', () => {
+  demoCounts = { apple: 0, banana: 0, grape: 0 };
+  renderTryChart();
+});
+
+/* =========================================================
+   PRACTICE ROUND
+========================================================== */
+const PRACTICE_CATS = [
+  { id: 'apple',  emoji: '🍎', name: 'Apples',  color: '#ef5350' },
+  { id: 'banana', emoji: '🍌', name: 'Bananas', color: '#fbc02d' }
+];
+
+let pPile = [];
+let pBins = { apple: [], banana: [] };
+let pSelected = null;
+let pTypedCounts = {};
+let pCompleted = false;
+
+function initPractice() {
+  pBins = { apple: [], banana: [] };
+  pSelected = null;
+  pTypedCounts = {};
+  pCompleted = false;
+
+  const items = [];
+  for (let i = 0; i < 3; i++) items.push({ id: 'pa' + i, cat: 'apple' });
+  for (let i = 0; i < 3; i++) items.push({ id: 'pb' + i, cat: 'banana' });
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+  pPile = items;
+
+  document.getElementById('practiceMsg').textContent = '';
+  document.getElementById('practiceResult').hidden = true;
+  document.getElementById('practiceCheckBtn').hidden = true;
+  document.getElementById('practiceCount').hidden = true;
+  renderPractice();
+}
+
+function renderPractice() {
+  // ---- pile ----
+  const pileEl = document.getElementById('practicePile');
+  pileEl.innerHTML = '';
+  if (pPile.length === 0) {
+    pileEl.innerHTML = '<div class="p-empty">All sorted! 🎉</div>';
+  } else {
+    pPile.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'item' + (pSelected === item.id ? ' selected' : '');
+      btn.textContent = PRACTICE_CATS.find(c => c.id === item.cat).emoji;
+      btn.addEventListener('click', () => {
+        pSelected = pSelected === item.id ? null : item.id;
+        renderPractice();
+      });
+      pileEl.appendChild(btn);
+    });
+  }
+
+  // ---- bins ----
+  const binsEl = document.getElementById('practiceBins');
+  binsEl.innerHTML = '';
+  PRACTICE_CATS.forEach(cat => {
+    const bin = document.createElement('div');
+    bin.className = 'bin';
+    bin.style.borderColor = cat.color;
+
+    const head = document.createElement('div');
+    head.className = 'bin-head';
+    head.innerHTML = `<span class="bin-emoji">${cat.emoji}</span><span>${cat.name}</span>`;
+    bin.appendChild(head);
+
+    const inner = document.createElement('div');
+    inner.className = 'bin-items';
+    pBins[cat.id].forEach(item => {
+      const chip = document.createElement('button');
+      chip.className = 'item small';
+      chip.textContent = cat.emoji;
+      chip.title = 'Tap to put it back';
+      chip.addEventListener('click', e => {
+        e.stopPropagation();
+        if (pCompleted) return;
+        pBins[cat.id] = pBins[cat.id].filter(x => x.id !== item.id);
+        pPile.push(item);
+        pSelected = null;
+        renderPractice();
+      });
+      inner.appendChild(chip);
+    });
+    bin.appendChild(inner);
+
+    bin.addEventListener('click', () => {
+      if (!pSelected || pCompleted) return;
+      const idx = pPile.findIndex(x => x.id === pSelected);
+      if (idx === -1) return;
+      const item = pPile.splice(idx, 1)[0];
+      pBins[cat.id].push(item);
+      pSelected = null;
+      renderPractice();
+    });
+
+    binsEl.appendChild(bin);
+  });
+
+  // ---- counting inputs appear when pile is empty ----
+  if (pPile.length === 0 && !pCompleted) {
+    const countEl = document.getElementById('practiceCount');
+    countEl.hidden = false;
+    countEl.innerHTML = '<p>Now count each basket and write the number!</p>';
+    const row = document.createElement('div');
+    row.className = 'practice-count-row';
+    PRACTICE_CATS.forEach(cat => {
+      const cell = document.createElement('div');
+      cell.className = 'practice-count-cell';
+      const lbl = document.createElement('span');
+      lbl.textContent = `${cat.emoji} ${cat.name}:`;
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.inputMode = 'numeric';
+      inp.maxLength = 2;
+      inp.className = 'num-input';
+      inp.placeholder = '?';
+      inp.dataset.cat = cat.id;
+      inp.value = pTypedCounts[cat.id] ?? '';
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, 2);
+        pTypedCounts[cat.id] = inp.value === '' ? undefined : Number(inp.value);
+      });
+      cell.appendChild(lbl);
+      cell.appendChild(inp);
+      row.appendChild(cell);
+    });
+    countEl.appendChild(row);
+    document.getElementById('practiceCheckBtn').hidden = false;
+  } else if (pPile.length > 0) {
+    document.getElementById('practiceCount').hidden = true;
+    document.getElementById('practiceCheckBtn').hidden = true;
+  }
+}
+
+function checkPractice() {
+  const inputs = [...document.querySelectorAll('#practiceCount .num-input')];
+
+  // all filled?
+  const empty = inputs.filter(i => i.value.trim() === '');
+  if (empty.length) {
+    document.getElementById('practiceMsg').textContent = 'Write a number in every box! ✏️';
+    empty.forEach(i => {
+      i.classList.add('wrong');
+      setTimeout(() => i.classList.remove('wrong'), 700);
+    });
+    return;
+  }
+
+  // correct?
+  let allCorrect = true;
+  inputs.forEach(inp => {
+    const catId = inp.dataset.cat;
+    const written = Number(inp.value);
+    const real = pBins[catId].length;
+    if (written === real) {
+      inp.classList.add('correct');
+    } else {
+      inp.classList.add('wrong');
+      setTimeout(() => inp.classList.remove('wrong'), 1200);
+      allCorrect = false;
+    }
+  });
+
+  if (!allCorrect) {
+    document.getElementById('practiceMsg').textContent = "Not quite! Let's count again! 🔍";
+    return;
+  }
+
+  // done!
+  pCompleted = true;
+  document.getElementById('practiceMsg').textContent = '';
+  document.getElementById('practiceCheckBtn').hidden = true;
+  document.getElementById('practiceCount').hidden = true;
+
+  const result = document.getElementById('practiceResult');
+  result.hidden = false;
+  result.innerHTML = '<p class="success">🎉 You did it! Here is your chart:</p>';
+
+  const chart = document.createElement('div');
+  chart.className = 'practice-chart';
+  const maxCount = Math.max(...PRACTICE_CATS.map(c => pBins[c.id].length), 1);
+  PRACTICE_CATS.forEach(cat => {
+    const count = pBins[cat.id].length;
+    const col = document.createElement('div');
+    col.className = 'practice-chart-col';
+    col.innerHTML = `
+      <div class="practice-chart-num">${count}</div>
+      <div class="practice-chart-bar" style="height: ${count * 100 / maxCount}px; background: ${cat.color};"></div>
+      <div class="practice-chart-label">${cat.emoji}</div>
+    `;
+    chart.appendChild(col);
+  });
+  result.appendChild(chart);
+
+  const ready = document.createElement('p');
+  ready.className = 'ready-msg';
+  ready.textContent = "🎯 You're ready for the real game!";
+  result.appendChild(ready);
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+document.getElementById('practiceCheckBtn').addEventListener('click', checkPractice);
+document.getElementById('practiceResetBtn').addEventListener('click', initPractice);
+initPractice();
+
+/* =========================================================
+   START GAME BUTTON
+========================================================== */
+document.getElementById('startBtn').addEventListener('click', () => {
+  document.getElementById('introScreen').hidden = true;
+  document.getElementById('gameScreen').hidden = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  newSet();
+});
+
+/* =========================================================
+   GAME — 5 sets with different themes
+========================================================== */
+const THEMES = [
+  {
+    name: 'Fruits', total: 10,
+    items: [
+      { id: 'apple',  emoji: '🍎', name: 'Apples',  color: '#ef5350' },
+      { id: 'banana', emoji: '🍌', name: 'Bananas', color: '#fbc02d' },
+      { id: 'grape',  emoji: '🍇', name: 'Grapes',  color: '#9c5bd6' },
+      { id: 'orange', emoji: '🍊', name: 'Oranges', color: '#fb8c00' }
+    ]
+  },
+  {
+    name: 'Animals', total: 15,
+    items: [
+      { id: 'dog',    emoji: '🐶', name: 'Dogs',    color: '#8d6e63' },
+      { id: 'cat',    emoji: '🐱', name: 'Cats',    color: '#ffb74d' },
+      { id: 'rabbit', emoji: '🐰', name: 'Rabbits', color: '#f48fb1' },
+      { id: 'bear',   emoji: '🐻', name: 'Bears',   color: '#a1887f' }
+    ]
+  },
+  {
+    name: 'Vehicles', total: 20,
+    items: [
+      { id: 'car',    emoji: '🚗', name: 'Cars',    color: '#ef5350' },
+      { id: 'bus',    emoji: '🚌', name: 'Buses',   color: '#ffb300' },
+      { id: 'rocket', emoji: '🚀', name: 'Rockets', color: '#42a5f5' },
+      { id: 'plane',  emoji: '✈️', name: 'Planes',  color: '#26c6da' }
+    ]
+  },
+  {
+    name: 'Sports', total: 25,
+    items: [
+      { id: 'soccer', emoji: '⚽', name: 'Soccer',      color: '#66bb6a' },
+      { id: 'basket', emoji: '🏀', name: 'Basketballs', color: '#ff7043' },
+      { id: 'tennis', emoji: '🎾', name: 'Tennis',      color: '#c0ca33' },
+      { id: 'foot',   emoji: '🏈', name: 'Footballs',   color: '#8d6e63' }
+    ]
+  },
+  {
+    name: 'Nature', total: 30,
+    items: [
+      { id: 'sun',     emoji: '☀️', name: 'Suns',     color: '#ffb300' },
+      { id: 'rainbow', emoji: '🌈', name: 'Rainbows', color: '#ab47bc' },
+      { id: 'moon',    emoji: '🌙', name: 'Moons',    color: '#5c6bc0' },
+      { id: 'star',    emoji: '⭐', name: 'Stars',    color: '#ffca28' }
+    ]
+  }
+];
+const TOTAL_SETS = THEMES.length;
+
+const pileEl      = document.getElementById('pile');
+const binsEl      = document.getElementById('bins');
+const hintEl      = document.getElementById('hint');
+const setbarEl    = document.getElementById('setbar');
+const setinfoEl   = document.getElementById('setinfo');
+const boardEl     = document.getElementById('board');
+const actionsEl   = document.getElementById('actions');
+const graphBtn    = document.getElementById('graphBtn');
+const newBtn      = document.getElementById('newBtn');
+const nextBtn     = document.getElementById('nextBtn');
+const countCard   = document.getElementById('countCard');
+const countRowsEl = document.getElementById('countRows');
+const graphCard   = document.getElementById('graphCard');
+const graphTitle  = document.getElementById('graphTitle');
+const plotEl      = document.getElementById('plot');
+const labelsEl    = document.getElementById('labels');
+const graphNote   = document.getElementById('graphNote');
+const finaleCard  = document.getElementById('finaleCard');
+
+let pile = [];
+let bins = {};
+let selected = null;
+let typedCounts = {};
+let currentSet = 1;
+let completedSets = new Array(TOTAL_SETS).fill(false);
+let CATS = [];
+let CAT_MAP = {};
+
+function setThemeForCurrentSet() {
+  CATS = THEMES[currentSet - 1].items;
+  CAT_MAP = {};
+  CATS.forEach(c => CAT_MAP[c.id] = c);
+}
+
+function newSet() {
+  setThemeForCurrentSet();
+
+  pile = [];
+  bins = {};
+  typedCounts = {};
+  selected = null;
+  CATS.forEach(c => bins[c.id] = []);
+
+  const total = THEMES[currentSet - 1].total;
+
+  // Give every basket at least 1, share the rest randomly
+  const perCat = CATS.map(() => 1);
+  let remaining = total - CATS.length;
+  while (remaining > 0) {
+    perCat[Math.floor(Math.random() * CATS.length)]++;
+    remaining--;
+  }
+
+  let uid = 0;
+  CATS.forEach((cat, i) => {
+    for (let n = 0; n < perCat[i]; n++) {
+      pile.push({ id: 'f' + (uid++), cat: cat.id });
+    }
+  });
+
+  for (let i = pile.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pile[i], pile[j]] = [pile[j], pile[i]];
+  }
+
+  countCard.hidden = true;
+  graphCard.hidden = true;
+  finaleCard.hidden = true;
+  boardEl.hidden = false;
+  actionsEl.hidden = false;
+  graphBtn.hidden = false;
+  newBtn.hidden = false;
+  nextBtn.hidden = true;
+
+  render();
+}
+
+function render() {
+  renderSetBar();
+  renderPile();
+  renderBins();
+  renderCountCard();
+}
+
+function renderSetBar() {
+  setbarEl.innerHTML = '';
+  for (let i = 1; i <= TOTAL_SETS; i++) {
+    const pill = document.createElement('div');
+    let cls = 'setpill';
+    if (completedSets[i - 1]) cls += ' done';
+    if (i === currentSet) cls += ' active';
+    pill.className = cls;
+    pill.textContent = completedSets[i - 1] ? '✓' : i;
+    pill.title = `Set ${i} (${THEMES[i - 1].name}): ${THEMES[i - 1].total} items`;
+    setbarEl.appendChild(pill);
+  }
+  const theme = THEMES[currentSet - 1];
+  setinfoEl.textContent =
+    `Set ${currentSet} of ${TOTAL_SETS} — ${theme.name} — ${theme.total} items`;
+}
+
+function renderPile() {
+  pileEl.innerHTML = '';
+  if (pile.length === 0) {
+    const done = document.createElement('div');
+    done.className = 'empty';
+    done.textContent = 'All sorted! 🎉';
+    pileEl.appendChild(done);
+    return;
+  }
+  const dense = pile.length > 16;
+  pile.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'item' + (dense ? ' dense' : '') + (selected === item.id ? ' selected' : '');
+    btn.textContent = CAT_MAP[item.cat].emoji;
+    btn.setAttribute('aria-label', CAT_MAP[item.cat].name);
+    btn.addEventListener('click', () => {
+      selected = (selected === item.id) ? null : item.id;
+      render();
+    });
+    pileEl.appendChild(btn);
+  });
+}
+
+function renderBins() {
+  binsEl.innerHTML = '';
+  const dense = pile.length > 16 || CATS.some(c => bins[c.id].length > 9);
+
+  CATS.forEach(cat => {
+    const bin = document.createElement('div');
+    bin.className = 'bin';
+    bin.style.borderColor = cat.color;
+
+    const head = document.createElement('div');
+    head.className = 'bin-head';
+    head.innerHTML = `<span class="bin-emoji">${cat.emoji}</span><span>${cat.name}</span>`;
+    bin.appendChild(head);
+
+    const inner = document.createElement('div');
+    inner.className = 'bin-items';
+    bins[cat.id].forEach(item => {
+      const chip = document.createElement('button');
+      chip.className = 'item small' + (dense ? ' dense' : '');
+      chip.textContent = CAT_MAP[item.cat].emoji;
+      chip.title = 'Tap to put it back';
+      chip.addEventListener('click', e => {
+        e.stopPropagation();
+        bins[cat.id] = bins[cat.id].filter(x => x.id !== item.id);
+        pile.push(item);
+        selected = null;
+        graphCard.hidden = true;
+        render();
+      });
+      inner.appendChild(chip);
+    });
+    bin.appendChild(inner);
+    bin.addEventListener('click', () => dropInto(cat.id));
+    binsEl.appendChild(bin);
+  });
+}
+
+function renderCountCard() {
+  if (pile.length > 0 || !graphCard.hidden || !finaleCard.hidden) {
+    countCard.hidden = true;
+    updateHint();
+    return;
+  }
+  countCard.hidden = false;
+  countRowsEl.innerHTML = '';
+
+  CATS.forEach(cat => {
+    const row = document.createElement('div');
+    row.className = 'count-row';
+    row.dataset.cat = cat.id;
+
+    const label = document.createElement('div');
+    label.className = 'count-label';
+    label.innerHTML = `<span class="bin-emoji">${cat.emoji}</span><span>${cat.name}</span>`;
+
+    const fruits = document.createElement('div');
+    fruits.className = 'count-fruits';
+    bins[cat.id].forEach(() => {
+      const s = document.createElement('span');
+      s.textContent = cat.emoji;
+      fruits.appendChild(s);
+    });
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.autocomplete = 'off';
+    input.maxLength = 2;
+    input.className = 'num-input';
+    input.placeholder = '?';
+    input.dataset.cat = cat.id;
+    input.setAttribute('aria-label', 'How many ' + cat.name + '?');
+    input.value = typedCounts[cat.id] ?? '';
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 2);
+      input.classList.remove('correct', 'wrong');
+      row.classList.remove('wrong');
+      typedCounts[cat.id] = input.value === '' ? undefined : Number(input.value);
+    });
+
+    row.appendChild(label);
+    row.appendChild(fruits);
+    row.appendChild(input);
+    countRowsEl.appendChild(row);
+  });
+  updateHint();
+}
+
+function updateHint() {
+  if (!finaleCard.hidden) { hintEl.textContent = ''; return; }
+  if (!graphCard.hidden) return;
+  if (pile.length === 0) {
+    hintEl.textContent = 'Count each basket and write the number! ✏️';
+  } else if (selected) {
+    hintEl.textContent = 'Now tap the matching basket! 👇';
+  } else {
+    hintEl.textContent = 'Tap an item, then tap a basket. 👆➡️🧺';
+  }
+}
+
+function dropInto(catId) {
+  if (!selected) return;
+  const index = pile.findIndex(item => item.id === selected);
+  if (index === -1) return;
+  const item = pile.splice(index, 1)[0];
+  bins[catId].push(item);
+  selected = null;
+  graphCard.hidden = true;
+  render();
+}
+
+const MAX_H = 180;
+
+function checkAndGraph() {
+  if (pile.length > 0) {
+    hintEl.textContent = 'Sort all the items first! 🙂';
+    return;
+  }
+  const inputs = [...countRowsEl.querySelectorAll('.num-input')];
+  const empty = inputs.filter(inp => inp.value.trim() === '');
+  if (empty.length > 0) {
+    hintEl.textContent = 'Write a number in every box! ✏️';
+    empty.forEach(inp => {
+      inp.classList.add('wrong');
+      setTimeout(() => inp.classList.remove('wrong'), 700);
+    });
+    return;
+  }
+  let allCorrect = true;
+  inputs.forEach(inp => {
+    const catId = inp.dataset.cat;
+    const written = Number(inp.value);
+    const real = bins[catId].length;
+    const row = inp.closest('.count-row');
+    if (written === real) {
+      inp.classList.add('correct');
+      inp.classList.remove('wrong');
+      row.classList.remove('wrong');
+    } else {
+      inp.classList.add('wrong');
+      inp.classList.remove('correct');
+      row.classList.add('wrong');
+      allCorrect = false;
+    }
+  });
+  if (!allCorrect) {
+    hintEl.textContent = 'Oops! Some numbers are not right. Count again! 🔍';
+    setTimeout(() => {
+      countRowsEl.querySelectorAll('.count-row.wrong').forEach(r => r.classList.remove('wrong'));
+      countRowsEl.querySelectorAll('.num-input.wrong').forEach(i => i.classList.remove('wrong'));
+    }, 1200);
+    return;
+  }
+  inputs.forEach(inp => inp.disabled = true);
+  completedSets[currentSet - 1] = true;
+  renderSetBar();
+  buildGraph();
+}
+
+function buildGraph() {
+  graphCard.hidden = false;
+  countCard.hidden = true;
+  graphBtn.hidden = true;
+  newBtn.hidden = true;
+  nextBtn.hidden = false;
+  nextBtn.textContent = (currentSet < TOTAL_SETS) ? 'Next Set ▶' : '🎉 Finish!';
+
+  const theme = THEMES[currentSet - 1];
+  graphTitle.textContent = `Our Graph — Set ${currentSet}: ${theme.name} (${theme.total} items)`;
+  plotEl.innerHTML = '';
+  labelsEl.innerHTML = '';
+
+  const counts = CATS.map(c => bins[c.id].length);
+  const biggest = Math.max(...counts, 1);
+  const scale = MAX_H / biggest;
+
+  CATS.forEach((cat, i) => {
+    const count = counts[i];
+    const col = document.createElement('div');
+    col.className = 'col';
+    const countEl = document.createElement('div');
+    countEl.className = 'count';
+    countEl.textContent = count;
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.background = cat.color;
+    bar.style.height = '0px';
+    col.appendChild(countEl);
+    col.appendChild(bar);
+    plotEl.appendChild(col);
+    const target = count === 0 ? 0 : Math.max(count * scale, 10);
+    setTimeout(() => { bar.style.height = target + 'px'; }, 80 + i * 140);
+    const label = document.createElement('div');
+    label.textContent = cat.emoji;
+    labelsEl.appendChild(label);
+  });
+
+  const winners = CATS.filter((c, i) => counts[i] === biggest && biggest > 0);
+  if (winners.length === 1) {
+    graphNote.textContent = `🏆 The tallest bar is ${winners[0].name} with ${biggest}!`;
+  } else {
+    graphNote.textContent = `🏆 There is a tie! ${winners.map(w => w.name).join(' and ')} have ${biggest}.`;
+  }
+  hintEl.textContent = 'You counted correctly! 🎉';
+  graphCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function goNextSet() {
+  if (currentSet < TOTAL_SETS) {
+    currentSet++;
+    newSet();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showFinale();
+  }
+}
+
+function showFinale() {
+  boardEl.hidden = true;
+  actionsEl.hidden = true;
+  countCard.hidden = true;
+  graphCard.hidden = true;
+  finaleCard.hidden = false;
+  hintEl.textContent = '';
+  setinfoEl.textContent = 'All 5 sets complete!';
+  finaleCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function playAgain() {
+  completedSets = new Array(TOTAL_SETS).fill(false);
+  currentSet = 1;
+  newSet();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+graphBtn.addEventListener('click', checkAndGraph);
+newBtn.addEventListener('click', newSet);
+nextBtn.addEventListener('click', goNextSet);
+document.getElementById('playAgainBtn').addEventListener('click', playAgain);
+</script>
+
+</body>
+</html>
